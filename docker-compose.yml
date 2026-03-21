@@ -8,9 +8,12 @@ services:
     ports:
       - "5000:3000"
     environment:
-      - DATABASE_URL=file:./dev.db
+      - DATABASE_URL=file:./prisma/dev.db
       - NEXTAUTH_SECRET=home-hub-secret-key-change-in-production
       - NEXTAUTH_URL=http://localhost:5000
     volumes:
-      - ./prisma/dev.db:/app/prisma/dev.db
+      - home-hub-data:/app/prisma
     restart: unless-stopped
+
+volumes:
+  home-hub-data:
