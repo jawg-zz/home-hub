@@ -6,11 +6,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "5000:3000"
     environment:
       - DATABASE_URL=file:./dev.db
       - NEXTAUTH_SECRET=home-hub-secret-key-change-in-production
-      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_URL=http://localhost:5000
     volumes:
       - ./prisma/dev.db:/app/prisma/dev.db
     restart: unless-stopped
