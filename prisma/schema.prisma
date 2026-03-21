@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  avatar    String?
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Device {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  room      String
+  status    String   @default("offline")
+  value     Int      @default(0)
+  online    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ShoppingItem {
+  id        String   @id @default(cuid())
+  name      String
+  quantity  String?
+  checked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Chore {
+  id          String   @id @default(cuid())
+  title       String
+  assignedTo  String?
+  dueDate     DateTime?
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CalendarEvent {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EnergyReading {
+  id        String   @id @default(cuid())
+  date      DateTime
+  usage     Float
+  cost      Float
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
