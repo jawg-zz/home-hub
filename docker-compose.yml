@@ -10,7 +10,7 @@ services:
     environment:
       - DATABASE_URL=file:./prisma/dev.db
       - NEXTAUTH_SECRET=home-hub-secret-key-change-in-production
-      - NEXTAUTH_URL=http://localhost:5000
+      - NEXTAUTH_URL=https://home.spidmax.win
     volumes:
       - home-hub-data:/app/prisma
     restart: unless-stopped
