@@ -24,7 +24,7 @@ export async function POST(
     return NextResponse.json(device)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 })
+      return NextResponse.json({ error: error.issues }, { status: 400 })
     }
     return NextResponse.json({ error: 'Failed to update device' }, { status: 500 })
   }

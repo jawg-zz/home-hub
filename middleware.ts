@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown'
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
   const now = Date.now()
 
   const rateLimitData = rateLimitMap.get(ip)

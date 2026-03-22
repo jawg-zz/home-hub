@@ -12,33 +12,67 @@ type Item = {
 export default function ShoppingList({ items: initialItems }: { items: Item[] }) {
   const [items, setItems] = useState(initialItems)
   const [newItem, setNewItem] = useState('')
+  const [addLoading, setAddLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
 
   const addItem = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newItem.trim()) return
+    if (!newItem.trim() || addLoading) return
     
-    const res = await fetch('/api/shopping', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newItem }),
-    })
-    const item = await res.json()
-    setItems([item, ...items])
-    setNewItem('')
+    setAddLoading(true)
+    try {
+      const res = await fetch('/api/shopping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newItem }),
+      })
+      if (!res.ok) throw new Error('Failed to add item')
+      const item = await res.json()
+      setItems([item, ...items])
+      setNewItem('')
+    } catch (error) {
+      console.error('Failed to add item:', error)
+      alert('Failed to add item')
+    } finally {
+      setAddLoading(false)
+    }
   }
 
   const toggleItem = async (id: string, checked: boolean) => {
-    await fetch(`/api/shopping/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checked: !checked }),
-    })
+    const previousItems = [...items]
     setItems(items.map(i => i.id === id ? { ...i, checked: !checked } : i))
+    
+    try {
+      const res = await fetch(`/api/shopping/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checked: !checked }),
+      })
+      if (!res.ok) throw new Error('Failed to toggle item')
+    } catch (error) {
+      setItems(previousItems)
+      console.error('Failed to toggle item:', error)
+      alert('Failed to update item')
+    }
   }
 
   const deleteItem = async (id: string) => {
-    await fetch(`/api/shopping/${id}`, { method: 'DELETE' })
+    if (!confirm('Are you sure you want to delete this item?')) return
+    
+    const previousItems = [...items]
+    setDeleteLoading(id)
     setItems(items.filter(i => i.id !== id))
+    
+    try {
+      const res = await fetch(`/api/shopping/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete item')
+    } catch (error) {
+      setItems(previousItems)
+      console.error('Failed to delete item:', error)
+      alert('Failed to delete item')
+    } finally {
+      setDeleteLoading(null)
+    }
   }
 
   return (
@@ -49,9 +83,12 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           placeholder="Add item..."
+          disabled={addLoading}
           style={{ flex: 1 }}
         />
-        <button type="submit" className="btn btn-primary">Add</button>
+        <button type="submit" className="btn btn-primary" disabled={addLoading}>
+          {addLoading ? 'Adding...' : 'Add'}
+        </button>
       </form>
 
       <div style={{ display: 'grid', gap: '0.5rem', maxHeight: '300px', overflowY: 'auto' }}>
@@ -69,24 +106,28 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
               type="checkbox"
               checked={item.checked}
               onChange={() => toggleItem(item.id, item.checked)}
+              aria-label={`Mark ${item.name} as ${item.checked ? 'unchecked' : 'checked'}`}
               style={{ width: '18px', height: '18px', cursor: 'pointer' }}
             />
             <span style={{ 
               flex: 1, 
               textDecoration: item.checked ? 'line-through' : 'none',
-              color: item.checked ? '#666' : '#e0e0e0',
+              color: item.checked ? '#999' : '#e0e0e0',
             }}>
               {item.name}
-              {item.quantity && <span style={{ color: '#666', marginLeft: '0.5rem' }}>{item.quantity}</span>}
+              {item.quantity && <span style={{ color: '#999', marginLeft: '0.5rem' }}>{item.quantity}</span>}
             </span>
             <button
               onClick={() => deleteItem(item.id)}
+              aria-label={`Delete ${item.name}`}
+              disabled={deleteLoading === item.id}
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#666',
-                cursor: 'pointer',
+                color: '#999',
+                cursor: deleteLoading === item.id ? 'not-allowed' : 'pointer',
                 padding: '0.25rem',
+                opacity: deleteLoading === item.id ? 0.5 : 1,
               }}
             >
               ✕
@@ -95,40 +136,6 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
         ))}
         {items.length === 0 && (
           <p style={{ color: '#999', textAlign: 'center', padding: '2rem' }}>No items yet</p>
-        )}
-      </div>
-    </div>
-  )
-}
-ty: deleteLoading === item.id ? 0.5 : 1,
-              }}
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-        {items.length === 0 && (
-          <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No items yet</p>
-        )}
-      </div>
-    </div>
-  )
-}
-ick={() => deleteItem(item.id)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#666',
-                cursor: 'pointer',
-                padding: '0.25rem',
-              }}
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-        {items.length === 0 && (
-          <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No items yet</p>
         )}
       </div>
     </div>

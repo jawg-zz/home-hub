@@ -91,11 +91,13 @@ export default function DeviceCard({ device }: { device: Device }) {
       <button
         onClick={toggleDevice}
         disabled={!device.online || loading}
+        aria-label={`Turn ${isOn ? 'off' : 'on'} ${device.name}`}
+        aria-busy={loading}
         style={{
           width: '100%',
           padding: '0.75rem',
           background: isOn ? '#00d4aa' : '#1a1a1a',
-          color: isOn ? '#0f0f0f' : '#666',
+          color: isOn ? '#0f0f0f' : '#999',
           border: isOn ? 'none' : '1px solid #333',
           borderRadius: '8px',
           fontWeight: 500,
@@ -104,12 +106,6 @@ export default function DeviceCard({ device }: { device: Device }) {
           transition: 'all 0.2s ease',
         }}
       >
-        {loading ? '...' : isOn ? 'Turn Off' : 'Turn On'}
-      </button>
-    </div>
-  )
-}
- >
         {loading ? 'Loading...' : isOn ? 'Turn Off' : 'Turn On'}
       </button>
     </div>
