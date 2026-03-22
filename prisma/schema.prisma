@@ -16,6 +16,7 @@ model User {
   role      String   @default("member")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chores    Chore[]
 }
 
 model Device {
@@ -46,13 +47,14 @@ model ShoppingItem {
 }
 
 model Chore {
-  id          String   @id @default(cuid())
-  title       String
-  assignedTo  String?
-  dueDate     DateTime?
-  completed   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String    @id @default(cuid())
+  title        String
+  assignedTo   String?
+  assignedUser User?     @relation(fields: [assignedTo], references: [id])
+  dueDate      DateTime?
+  completed    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([completed])
   @@index([dueDate])
