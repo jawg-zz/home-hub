@@ -47,12 +47,12 @@ async function main() {
     await prisma.shoppingItem.create({ data: item })
   }
 
-  // Create sample chores
+  // Create sample chores (assignedTo must be null or valid user ID)
   const chores = [
-    { title: 'Wash dishes', assignedTo: 'George', completed: false },
-    { title: 'Vacuum living room', assignedTo: 'Sarah', completed: true },
-    { title: 'Take out trash', assignedTo: 'George', completed: false },
-    { title: 'Water plants', assignedTo: 'Kids', completed: false },
+    { title: 'Wash dishes', assignedTo: null, completed: false },
+    { title: 'Vacuum living room', assignedTo: null, completed: true },
+    { title: 'Take out trash', assignedTo: null, completed: false },
+    { title: 'Water plants', assignedTo: null, completed: false },
   ]
 
   for (const chore of chores) {
