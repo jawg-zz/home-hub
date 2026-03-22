@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { choreSchema } from '@/lib/validations'
+import { z } from 'zod'
 
 export async function GET() {
   const session = await auth()
@@ -16,9 +18,18 @@ export async function POST(request: Request) {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const { title, assignedTo } = await request.json()
-  const chore = await prisma.chore.create({
-    data: { title, assignedTo },
-  })
-  return NextResponse.json(chore)
+  
+  try {
+    const body = await request.json()
+    const validated = choreSchema.parse(body)
+    const chore = await prisma.chore.create({
+      data: validated,
+    })
+    return NextResponse.json(chore)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 })
+    }
+    throw error
+  }
 }

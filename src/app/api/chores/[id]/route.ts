@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { choreUpdateSchema } from '@/lib/validations'
+import { z } from 'zod'
 
 export async function PATCH(
   request: Request,
@@ -10,13 +12,22 @@ export async function PATCH(
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const { id } = await params
-  const { completed } = await request.json()
-  const chore = await prisma.chore.update({
-    where: { id },
-    data: { completed },
-  })
-  return NextResponse.json(chore)
+  
+  try {
+    const { id } = await params
+    const body = await request.json()
+    const validated = choreUpdateSchema.parse(body)
+    const chore = await prisma.chore.update({
+      where: { id },
+      data: validated,
+    })
+    return NextResponse.json(chore)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 })
+    }
+    throw error
+  }
 }
 
 export async function DELETE(
