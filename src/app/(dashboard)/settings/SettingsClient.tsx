@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type User = {
   id: string
@@ -23,10 +23,19 @@ export default function SettingsPage({
 }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
+  useEffect(() => {
+    // Load theme from localStorage on mount
+    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null
+    if (savedTheme) {
+      setTheme(savedTheme)
+      document.documentElement.setAttribute('data-theme', savedTheme)
+    }
+  }, [])
+
   const toggleTheme = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme)
-    // In a real app, you'd save this to localStorage and apply CSS classes
     document.documentElement.setAttribute('data-theme', newTheme)
+    localStorage.setItem('theme', newTheme)
   }
 
   return (
@@ -151,7 +160,7 @@ export default function SettingsPage({
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>🎨 Appearance</h2>
         <p style={{ color: '#999', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          Choose your preferred theme. Light mode coming soon!
+          Choose your preferred theme. Changes apply immediately.
         </p>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button 
@@ -164,17 +173,13 @@ export default function SettingsPage({
           <button 
             onClick={() => toggleTheme('light')}
             className={theme === 'light' ? 'btn btn-primary' : 'btn btn-secondary'}
-            disabled
             style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              gap: '0.5rem',
-              opacity: 0.5,
-              cursor: 'not-allowed'
+              gap: '0.5rem'
             }}
-            title="Light mode coming soon"
           >
-            ☀️ Light Mode (Soon)
+            ☀️ Light Mode {theme === 'light' && '✓'}
           </button>
         </div>
       </div>
