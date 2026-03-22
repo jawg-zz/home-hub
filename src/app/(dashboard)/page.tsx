@@ -13,9 +13,6 @@ export default async function DashboardPage() {
   const recentDevices = await prisma.device.findMany({
     take: 4,
     orderBy: { updatedAt: 'desc' },
-    include: {
-      room: true, // Assuming device has a room relationship
-    }
   })
 
   const today = new Date()
