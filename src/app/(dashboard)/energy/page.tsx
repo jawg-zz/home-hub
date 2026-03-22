@@ -98,7 +98,11 @@ export default async function EnergyPage() {
               <Tooltip 
                 contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
                 labelStyle={{ color: '#e0e0e0' }}
-                formatter={(value: number) => [`KES ${(value * 150).toFixed(0)}`, 'Cost']}
+                formatter={(value: unknown) => {
+                  if (value === undefined || value === null) return ['', ''];
+                  const numValue = typeof value === 'string' ? parseFloat(value) : Number(value);
+                  return [`KES ${(numValue * 150).toFixed(0)}`, 'Cost'];
+                }}
               />
               <Bar dataKey="cost" fill="#ff6b35" radius={[4, 4, 0, 0]} />
             </BarChart>

@@ -199,7 +199,7 @@ export default async function DashboardPage() {
                       </div>
                       <div className="device-details">
                         <h4 className="device-name">{device.name}</h4>
-                        <p className="device-location">{device.room?.name || device.room || 'Unknown Room'}</p>
+                        <p className="device-location">{device.room || 'Unknown Room'}</p>
                       </div>
                     </div>
                     <span className={`badge ${device.online ? 'badge-success' : 'badge-offline'}`}>
