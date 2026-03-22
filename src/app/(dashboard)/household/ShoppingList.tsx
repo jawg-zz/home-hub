@@ -94,6 +94,40 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
           </div>
         ))}
         {items.length === 0 && (
+          <p style={{ color: '#999', textAlign: 'center', padding: '2rem' }}>No items yet</p>
+        )}
+      </div>
+    </div>
+  )
+}
+ty: deleteLoading === item.id ? 0.5 : 1,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        {items.length === 0 && (
+          <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No items yet</p>
+        )}
+      </div>
+    </div>
+  )
+}
+ick={() => deleteItem(item.id)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#666',
+                cursor: 'pointer',
+                padding: '0.25rem',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        {items.length === 0 && (
           <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No items yet</p>
         )}
       </div>

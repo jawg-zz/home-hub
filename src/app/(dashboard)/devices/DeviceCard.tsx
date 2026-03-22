@@ -58,7 +58,7 @@ export default function DeviceCard({ device }: { device: Device }) {
       </div>
       
       <h3 style={{ marginBottom: '0.25rem' }}>{device.name}</h3>
-      <p style={{ color: '#666', fontSize: '0.875rem', marginBottom: '1rem' }}>{device.room}</p>
+      <p style={{ color: '#999', fontSize: '0.875rem', marginBottom: '1rem' }}>{device.room}</p>
       
       {device.type === 'light' && isOn && (
         <div style={{ marginBottom: '1rem' }}>
@@ -105,6 +105,12 @@ export default function DeviceCard({ device }: { device: Device }) {
         }}
       >
         {loading ? '...' : isOn ? 'Turn Off' : 'Turn On'}
+      </button>
+    </div>
+  )
+}
+ >
+        {loading ? 'Loading...' : isOn ? 'Turn Off' : 'Turn On'}
       </button>
     </div>
   )

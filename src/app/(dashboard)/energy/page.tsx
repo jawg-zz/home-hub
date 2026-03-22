@@ -55,42 +55,35 @@ export default async function EnergyPage() {
         </div>
       </div>
 
-      {/* Usage Chart */}
-      <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>⚡ Daily Usage (kWh)</h2>
-        <div style={{ height: '300px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorUsage" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00d4aa" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#00d4aa" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-              <XAxis dataKey="date" stroke="#666" fontSize={12} />
-              <YAxis stroke="#666" fontSize={12} />
-              <Tooltip 
-                contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
-                labelStyle={{ color: '#e0e0e0' }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="usage" 
-                stroke="#00d4aa" 
-                fillOpacity={1} 
-                fill="url(#colorUsage)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+      {/* Charts */}
+      <UsageChart data={chartData} />
+      <CostChart data={chartData} />
+
+      {/* Tips */}
+      <div className="card" style={{ marginTop: '1.5rem' }}>
+        <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>💡 Energy Saving Tips</h2>
+        <div className="grid grid-3">
+          <div style={{ padding: '1rem', background: '#151515', borderRadius: '8px' }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>💡</div>
+            <div style={{ fontWeight: 500 }}>Use LED Bulbs</div>
+            <div style={{ color: '#666', fontSize: '0.875rem' }}>Switch to LED lights - they use 75% less energy</div>
+          </div>
+          <div style={{ padding: '1rem', background: '#151515', borderRadius: '8px' }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌡️</div>
+            <div style={{ fontWeight: 500 }}>Smart Thermostat</div>
+            <div style={{ color: '#666', fontSize: '0.875rem' }}>Set schedules to reduce heating/cooling when away</div>
+          </div>
+          <div style={{ padding: '1rem', background: '#151515', borderRadius: '8px' }}>
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🔌</div>
+            <div style={{ fontWeight: 500 }}>Unplug Devices</div>
+            <div style={{ color: '#666', fontSize: '0.875rem' }}>Standby power can account for 10% of your bill</div>
+          </div>
         </div>
       </div>
-
-      {/* Cost Chart */}
-      <div className="card">
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>💰 Daily Cost (KES)</h2>
-        <div style={{ height: '300px' }}>
-          <ResponsiveContainer width="100%" height="100%">
+    </div>
+  )
+}
+">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#222" />
               <XAxis dataKey="date" stroke="#666" fontSize={12} />

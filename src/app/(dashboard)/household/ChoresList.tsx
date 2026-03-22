@@ -104,6 +104,40 @@ export default function ChoresList({ chores: initialChores }: { chores: Chore[] 
           </div>
         ))}
         {chores.length === 0 && (
+          <p style={{ color: '#999', textAlign: 'center', padding: '2rem' }}>No chores yet</p>
+        )}
+      </div>
+    </div>
+  )
+}
+      opacity: deleteLoading === chore.id ? 0.5 : 1,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        {chores.length === 0 && (
+          <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No chores yet</p>
+        )}
+      </div>
+    </div>
+  )
+}
+() => deleteChore(chore.id)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#666',
+                cursor: 'pointer',
+                padding: '0.25rem',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        {chores.length === 0 && (
           <p style={{ color: '#666', textAlign: 'center', padding: '2rem' }}>No chores yet</p>
         )}
       </div>
