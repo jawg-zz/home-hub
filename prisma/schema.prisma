@@ -28,6 +28,10 @@ model Device {
   online    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([room])
+  @@index([online])
+  @@index([status])
 }
 
 model ShoppingItem {
@@ -37,6 +41,8 @@ model ShoppingItem {
   checked   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([checked])
 }
 
 model Chore {
@@ -47,6 +53,9 @@ model Chore {
   completed   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([completed])
+  @@index([dueDate])
 }
 
 model CalendarEvent {
