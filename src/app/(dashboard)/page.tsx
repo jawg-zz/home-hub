@@ -4,37 +4,39 @@ import { prisma } from '@/lib/prisma'
 export default async function DashboardPage() {
   const session = await auth()
   
-  const deviceCount = await prisma.device.count()
-  const onlineDevices = await prisma.device.count({ where: { online: true } })
-  const shoppingItems = await prisma.shoppingItem.count({ where: { checked: false } })
-  const pendingChores = await prisma.chore.count({ where: { completed: false } })
+  try {
+    const [deviceCount, onlineDevices, shoppingItems, pendingChores, recentDevices, energyToday] = await Promise.all([
+      prisma.device.count(),
+      prisma.device.count({ where: { online: true } }),
+      prisma.shoppingItem.count({ where: { checked: false } }),
+      prisma.chore.count({ where: { completed: false } }),
+      prisma.device.findMany({
+        take: 4,
+        orderBy: { updatedAt: 'desc' },
+      }),
+      (async () => {
+        const today = new Date()
+        return prisma.energyReading.findFirst({
+          where: {
+            date: {
+              gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+            },
+          },
+        })
+      })()
+    ])
 
-  // Get recent activity
-  const recentDevices = await prisma.device.findMany({
-    take: 4,
-    orderBy: { updatedAt: 'desc' },
-  })
+    // Mock weather data (would typically come from an API)
+    const weatherData = {
+      temperature: 24,
+      condition: 'Partly Cloudy',
+      humidity: 65,
+      windSpeed: 12,
+      location: 'Nairobi, Kenya',
+      icon: '⛅' // Could be dynamic based on condition
+    }
 
-  const today = new Date()
-  const energyToday = await prisma.energyReading.findFirst({
-    where: {
-      date: {
-        gte: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
-      },
-    },
-  })
-
-  // Mock weather data (would typically come from an API)
-  const weatherData = {
-    temperature: 24,
-    condition: 'Partly Cloudy',
-    humidity: 65,
-    windSpeed: 12,
-    location: 'Nairobi, Kenya',
-    icon: '⛅' // Could be dynamic based on condition
-  }
-
-  return (
+    return (
     <div className="dashboard-container">
       {/* Welcome Header */}
       <header className="welcome-header">
@@ -257,4 +259,8 @@ export default async function DashboardPage() {
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('Dashboard error:', error)
+    throw error
+  }
 }
