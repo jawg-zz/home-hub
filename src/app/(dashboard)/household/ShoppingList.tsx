@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { useToast } from '@/components/Toast'
 
 type Item = {
@@ -10,6 +10,83 @@ type Item = {
   checked: boolean
 }
 
+function ShoppingItem({ item, onToggle, onDelete, deleteLoading }: {
+  item: Item
+  onToggle: (id: string, checked: boolean) => void
+  onDelete: (id: string) => void
+  deleteLoading: boolean
+}) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      padding: '0.75rem',
+      background: '#151515',
+      borderRadius: '8px',
+      opacity: item.checked ? 0.5 : 1,
+      transition: 'opacity 0.2s ease',
+    }}>
+      <input
+        type="checkbox"
+        checked={item.checked}
+        onChange={() => onToggle(item.id, item.checked)}
+        aria-label={`Mark ${item.name} as ${item.checked ? 'unchecked' : 'checked'}`}
+        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+      />
+      <span style={{ 
+        flex: 1, 
+        textDecoration: item.checked ? 'line-through' : 'none',
+        color: item.checked ? '#999' : '#e0e0e0',
+        transition: 'color 0.2s ease',
+      }}>
+        {item.name}
+        {item.quantity && <span style={{ color: '#999', marginLeft: '0.5rem' }}>{item.quantity}</span>}
+      </span>
+      <button
+        onClick={() => onDelete(item.id)}
+        aria-label={`Delete ${item.name}`}
+        disabled={deleteLoading}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#999',
+          cursor: deleteLoading ? 'not-allowed' : 'pointer',
+          padding: '0.5rem',
+          minWidth: '44px',
+          minHeight: '44px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: deleteLoading ? 0.5 : 1,
+          outline: 'none',
+          transition: 'color 0.2s ease, transform 0.1s ease',
+        }}
+        onMouseEnter={(e) => {
+          if (!deleteLoading) {
+            e.currentTarget.style.color = '#ff6b35'
+            e.currentTarget.style.transform = 'scale(1.1)'
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = '#999'
+          e.currentTarget.style.transform = 'scale(1)'
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.boxShadow = 'none'
+        }}
+      >
+        ✕
+      </button>
+    </div>
+  )
+}
+
+const MemoizedShoppingItem = memo(ShoppingItem)
+
 export default function ShoppingList({ items: initialItems }: { items: Item[] }) {
   const [items, setItems] = useState(initialItems)
   const [newItem, setNewItem] = useState('')
@@ -17,7 +94,7 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
   const { showToast } = useToast()
 
-  const addItem = async (e: React.FormEvent) => {
+  const addItem = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newItem.trim() || addLoading) return
     
@@ -39,9 +116,9 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
     } finally {
       setAddLoading(false)
     }
-  }
+  }, [newItem, addLoading, items, showToast])
 
-  const toggleItem = async (id: string, checked: boolean) => {
+  const toggleItem = useCallback(async (id: string, checked: boolean) => {
     const previousItems = [...items]
     setItems(items.map(i => i.id === id ? { ...i, checked: !checked } : i))
     
@@ -58,9 +135,9 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
       console.error('Failed to toggle item:', error)
       showToast('Failed to update item', 'error')
     }
-  }
+  }, [items, showToast])
 
-  const deleteItem = async (id: string) => {
+  const deleteItem = useCallback(async (id: string) => {
     const itemToDelete = items.find(i => i.id === id)
     if (!itemToDelete) return
     
@@ -94,7 +171,7 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
     } finally {
       setDeleteLoading(null)
     }
-  }
+  }, [items, showToast])
 
   return (
     <div>
@@ -135,58 +212,13 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
           </div>
         ) : (
           items.map((item) => (
-            <div key={item.id} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem',
-              background: '#151515',
-              borderRadius: '8px',
-              opacity: item.checked ? 0.5 : 1,
-            }}>
-              <input
-                type="checkbox"
-                checked={item.checked}
-                onChange={() => toggleItem(item.id, item.checked)}
-                aria-label={`Mark ${item.name} as ${item.checked ? 'unchecked' : 'checked'}`}
-                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-              />
-              <span style={{ 
-                flex: 1, 
-                textDecoration: item.checked ? 'line-through' : 'none',
-                color: item.checked ? '#999' : '#e0e0e0',
-              }}>
-                {item.name}
-                {item.quantity && <span style={{ color: '#999', marginLeft: '0.5rem' }}>{item.quantity}</span>}
-              </span>
-              <button
-                onClick={() => deleteItem(item.id)}
-                aria-label={`Delete ${item.name}`}
-                disabled={deleteLoading === item.id}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#999',
-                  cursor: deleteLoading === item.id ? 'not-allowed' : 'pointer',
-                  padding: '0.5rem',
-                  minWidth: '44px',
-                  minHeight: '44px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: deleteLoading === item.id ? 0.5 : 1,
-                  outline: 'none',
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
-              >
-                ✕
-              </button>
-            </div>
+            <MemoizedShoppingItem
+              key={item.id}
+              item={item}
+              onToggle={toggleItem}
+              onDelete={deleteItem}
+              deleteLoading={deleteLoading === item.id}
+            />
           ))
         )}
       </div>
