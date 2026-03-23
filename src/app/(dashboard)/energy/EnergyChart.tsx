@@ -14,7 +14,11 @@ export default function EnergyChart({ data }: { data: ChartData[] }) {
       {/* Usage Chart */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Daily Usage (kWh)</h2>
-        <div style={{ width: '100%', height: '300px' }}>
+        <div 
+          style={{ width: '100%', height: '300px' }}
+          role="img"
+          aria-label={`Energy usage chart showing ${data.length} days of data. Average usage: ${(data.reduce((sum, d) => sum + d.usage, 0) / data.length).toFixed(1)} kWh per day.`}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data}>
               <defs>
@@ -50,7 +54,11 @@ export default function EnergyChart({ data }: { data: ChartData[] }) {
       {/* Cost Chart */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Daily Cost (KES)</h2>
-        <div style={{ width: '100%', height: '300px' }}>
+        <div 
+          style={{ width: '100%', height: '300px' }}
+          role="img"
+          aria-label={`Energy cost chart showing ${data.length} days of data. Average cost: KES ${(data.reduce((sum, d) => sum + d.cost, 0) * 150 / data.length).toFixed(0)} per day.`}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#222" />

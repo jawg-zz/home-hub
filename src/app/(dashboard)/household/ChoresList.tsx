@@ -99,15 +99,26 @@ export default function ChoresList({ chores: initialChores }: { chores: Chore[] 
   return (
     <div>
       <form onSubmit={addChore} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <label htmlFor="chore-input" style={{ position: 'absolute', left: '-9999px' }}>
+          Add new chore
+        </label>
         <input
+          id="chore-input"
+          ref={inputRef}
           type="text"
           value={newChore}
           onChange={(e) => setNewChore(e.target.value)}
           placeholder="Add chore..."
           disabled={addLoading}
+          aria-invalid={false}
           style={{ flex: 1 }}
         />
-        <button type="submit" className="btn btn-primary" disabled={addLoading}>
+        <button 
+          type="submit" 
+          className="btn btn-primary" 
+          disabled={addLoading}
+          aria-busy={addLoading}
+        >
           {addLoading ? 'Loading...' : 'Add'}
         </button>
       </form>
@@ -179,6 +190,21 @@ export default function ChoresList({ chores: initialChores }: { chores: Chore[] 
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+'
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.boxShadow = 'none'

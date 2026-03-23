@@ -39,19 +39,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div style={{
-        position: 'fixed',
-        bottom: '1.5rem',
-        right: '1.5rem',
-        zIndex: 9999,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem',
-        maxWidth: '400px',
-      }}>
+      <div 
+        style={{
+          position: 'fixed',
+          bottom: '1.5rem',
+          right: '1.5rem',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+          maxWidth: '400px',
+        }}
+        aria-live={toasts.some(t => t.type === 'error') ? 'assertive' : 'polite'}
+        aria-atomic="true"
+      >
         {toasts.map(toast => (
           <div
             key={toast.id}
+            role="status"
+            aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
             style={{
               background: toast.type === 'error' ? '#2a1515' : toast.type === 'success' ? '#152a1a' : '#1a1a1a',
               border: `1px solid ${toast.type === 'error' ? '#ff6b35' : toast.type === 'success' ? '#00d4aa' : '#333'}`,

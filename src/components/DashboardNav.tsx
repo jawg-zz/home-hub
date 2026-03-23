@@ -150,13 +150,15 @@ export default function DashboardNav({
       </aside>
 
       {/* Main Content */}
-      <main style={{
-        flex: 1,
-        marginLeft: '260px',
-        padding: '2rem',
-        background: '#0a0a0a',
-        minHeight: '100vh',
-      }}>
+      <main 
+        id="main-content"
+        style={{
+          flex: 1,
+          marginLeft: '260px',
+          padding: '2rem',
+          background: '#0a0a0a',
+          minHeight: '100vh',
+        }}>
         {children}
       </main>
     </div>

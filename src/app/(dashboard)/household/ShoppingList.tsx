@@ -99,15 +99,26 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
   return (
     <div>
       <form onSubmit={addItem} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+        <label htmlFor="shopping-input" style={{ position: 'absolute', left: '-9999px' }}>
+          Add new shopping item
+        </label>
         <input
+          id="shopping-input"
+          ref={inputRef}
           type="text"
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           placeholder="Add item..."
           disabled={addLoading}
+          aria-invalid={false}
           style={{ flex: 1 }}
         />
-        <button type="submit" className="btn btn-primary" disabled={addLoading}>
+        <button 
+          type="submit" 
+          className="btn btn-primary" 
+          disabled={addLoading}
+          aria-busy={addLoading}
+        >
           {addLoading ? 'Loading...' : 'Add'}
         </button>
       </form>
@@ -171,6 +182,19 @@ export default function ShoppingList({ items: initialItems }: { items: Item[] })
                   e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
                 }}
                 onBlur={(e) => {
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+              onBlur={(e) => {
                   e.currentTarget.style.boxShadow = 'none'
                 }}
               >
