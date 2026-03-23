@@ -17,9 +17,12 @@ export function createErrorResponse(
   status: number,
   details?: unknown
 ) {
-  return {
+  const response: { error: string; status: number; details?: unknown } = {
     error: message,
     status,
-    ...(details && { details }),
   }
+  if (details) {
+    response.details = details
+  }
+  return response
 }
