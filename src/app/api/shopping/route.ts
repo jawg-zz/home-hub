@@ -2,34 +2,83 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { shoppingItemSchema } from '@/lib/validations'
+import { logger } from '@/lib/logger'
+import { monitoring } from '@/lib/monitoring'
+import { getRequestId, createErrorResponse } from '@/lib/request'
 import { z } from 'zod'
 
 export async function GET() {
-  const session = await auth()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const requestId = await getRequestId()
+  
+  try {
+    const session = await auth()
+    if (!session) {
+      logger.warn('Unauthorized shopping list access', { requestId })
+      return NextResponse.json(
+        createErrorResponse('Please sign in to continue', 401),
+        { status: 401 }
+      )
+    }
+    
+    const items = await monitoring.trackPerformance(
+      'shopping-list-fetch',
+      async () => prisma.shoppingItem.findMany({ orderBy: { createdAt: 'desc' } }),
+      { requestId, userId: session.user.id }
+    )
+    
+    return NextResponse.json(items)
+  } catch (error) {
+    monitoring.trackError(
+      error instanceof Error ? error : new Error(String(error)),
+      { endpoint: '/api/shopping', method: 'GET', requestId }
+    )
+    return NextResponse.json(
+      createErrorResponse('Failed to fetch shopping list', 500),
+      { status: 500 }
+    )
   }
-  const items = await prisma.shoppingItem.findMany({ orderBy: { createdAt: 'desc' } })
-  return NextResponse.json(items)
 }
 
 export async function POST(request: Request) {
-  const session = await auth()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const requestId = await getRequestId()
   
   try {
+    const session = await auth()
+    if (!session) {
+      logger.warn('Unauthorized shopping item creation', { requestId })
+      return NextResponse.json(
+        createErrorResponse('Please sign in to continue', 401),
+        { status: 401 }
+      )
+    }
+    
     const body = await request.json()
     const validated = shoppingItemSchema.parse(body)
-    const item = await prisma.shoppingItem.create({
-      data: validated,
-    })
+    
+    const item = await monitoring.trackPerformance(
+      'shopping-item-create',
+      async () => prisma.shoppingItem.create({ data: validated }),
+      { requestId, userId: session.user.id }
+    )
+    
+    logger.info('Shopping item created', { requestId, itemId: item.id })
     return NextResponse.json(item)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 })
+      logger.warn('Invalid shopping item data', { requestId, errors: error.issues })
+      return NextResponse.json(
+        createErrorResponse('Invalid item data', 400, error.issues),
+        { status: 400 }
+      )
     }
-    throw error
+    
+    monitoring.trackError(
+      error instanceof Error ? error : new Error(String(error)),
+      { endpoint: '/api/shopping', method: 'POST', requestId }
+    )
+    return NextResponse.json(
+      createErrorResponse('Failed to create shopping item', 500),
+      { status: 500 }
+    )
   }
 }

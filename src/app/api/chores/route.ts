@@ -2,34 +2,83 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { choreSchema } from '@/lib/validations'
+import { logger } from '@/lib/logger'
+import { monitoring } from '@/lib/monitoring'
+import { getRequestId, createErrorResponse } from '@/lib/request'
 import { z } from 'zod'
 
 export async function GET() {
-  const session = await auth()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const requestId = await getRequestId()
+  
+  try {
+    const session = await auth()
+    if (!session) {
+      logger.warn('Unauthorized chores access', { requestId })
+      return NextResponse.json(
+        createErrorResponse('Please sign in to continue', 401),
+        { status: 401 }
+      )
+    }
+    
+    const chores = await monitoring.trackPerformance(
+      'chores-fetch',
+      async () => prisma.chore.findMany({ orderBy: { createdAt: 'desc' } }),
+      { requestId, userId: session.user.id }
+    )
+    
+    return NextResponse.json(chores)
+  } catch (error) {
+    monitoring.trackError(
+      error instanceof Error ? error : new Error(String(error)),
+      { endpoint: '/api/chores', method: 'GET', requestId }
+    )
+    return NextResponse.json(
+      createErrorResponse('Failed to fetch chores', 500),
+      { status: 500 }
+    )
   }
-  const chores = await prisma.chore.findMany({ orderBy: { createdAt: 'desc' } })
-  return NextResponse.json(chores)
 }
 
 export async function POST(request: Request) {
-  const session = await auth()
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const requestId = await getRequestId()
   
   try {
+    const session = await auth()
+    if (!session) {
+      logger.warn('Unauthorized chore creation', { requestId })
+      return NextResponse.json(
+        createErrorResponse('Please sign in to continue', 401),
+        { status: 401 }
+      )
+    }
+    
     const body = await request.json()
     const validated = choreSchema.parse(body)
-    const chore = await prisma.chore.create({
-      data: validated,
-    })
+    
+    const chore = await monitoring.trackPerformance(
+      'chore-create',
+      async () => prisma.chore.create({ data: validated }),
+      { requestId, userId: session.user.id }
+    )
+    
+    logger.info('Chore created', { requestId, choreId: chore.id })
     return NextResponse.json(chore)
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 })
+      logger.warn('Invalid chore data', { requestId, errors: error.issues })
+      return NextResponse.json(
+        createErrorResponse('Invalid chore data', 400, error.issues),
+        { status: 400 }
+      )
     }
-    throw error
+    
+    monitoring.trackError(
+      error instanceof Error ? error : new Error(String(error)),
+      { endpoint: '/api/chores', method: 'POST', requestId }
+    )
+    return NextResponse.json(
+      createErrorResponse('Failed to create chore', 500),
+      { status: 500 }
+    )
   }
 }

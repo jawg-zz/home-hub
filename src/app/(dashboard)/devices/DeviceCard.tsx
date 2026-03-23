@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, memo } from 'react'
 import { useToast } from '@/components/Toast'
 
 type Device = {
@@ -13,12 +13,12 @@ type Device = {
   online: boolean
 }
 
-export default function DeviceCard({ device }: { device: Device }) {
+function DeviceCard({ device }: { device: Device }) {
   const [isOn, setIsOn] = useState(device.status === 'on' || device.status === 'locked')
   const [loading, setLoading] = useState(false)
   const { showToast } = useToast()
 
-  const toggleDevice = async () => {
+  const toggleDevice = useCallback(async () => {
     setLoading(true)
     try {
       const newStatus = isOn ? 'off' : 'on'
@@ -35,9 +35,9 @@ export default function DeviceCard({ device }: { device: Device }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [device.id, device.name, isOn, showToast])
 
-  const getIcon = () => {
+  const getIcon = useCallback(() => {
     switch (device.type) {
       case 'light': return '💡'
       case 'lock': return isOn ? '🔒' : '🔓'
@@ -47,12 +47,12 @@ export default function DeviceCard({ device }: { device: Device }) {
       case 'sprinkler': return '💦'
       default: return '📟'
     }
-  }
+  }, [device.type, isOn])
 
   return (
-    <div className="card" style={{ 
+    <div className="card device-card" style={{ 
       opacity: device.online ? 1 : 0.5,
-      transition: 'all 0.2s ease',
+      transition: 'all 0.2s ease, transform 0.2s ease',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
         <span style={{ fontSize: '2rem' }}>{getIcon()}</span>
@@ -61,7 +61,7 @@ export default function DeviceCard({ device }: { device: Device }) {
         </span>
       </div>
       
-      <h3 style={{ marginBottom: '0.25rem' }}>{device.name}</h3>
+      <h3 style={{ marginBottom: '0.25rem', fontWeight: 600 }}>{device.name}</h3>
       <p style={{ color: '#999', fontSize: '0.875rem', marginBottom: '1rem' }}>{device.room}</p>
       
       {device.type === 'light' && isOn && (
@@ -97,6 +97,7 @@ export default function DeviceCard({ device }: { device: Device }) {
         disabled={!device.online || loading}
         aria-label={`Turn ${isOn ? 'off' : 'on'} ${device.name}`}
         aria-busy={loading}
+        className="device-toggle-btn"
         style={{
           width: '100%',
           padding: '0.75rem',
@@ -122,3 +123,5 @@ export default function DeviceCard({ device }: { device: Device }) {
     </div>
   )
 }
+
+export default memo(DeviceCard)

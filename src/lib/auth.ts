@@ -10,6 +10,8 @@ type UserRole = {
   role: string
 }
 
+const ONE_DAY_IN_SECONDS = 86400
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   providers: [
@@ -51,12 +53,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         const u = user as unknown as UserRole
         token.id = u.id
         token.role = u.role
       }
+      
+      // Refresh session on update trigger
+      if (trigger === 'update') {
+        token.iat = Math.floor(Date.now() / 1000)
+      }
+      
       return token
     },
     async session({ session, token }) {
@@ -72,5 +80,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: {
     strategy: 'jwt',
+    maxAge: ONE_DAY_IN_SECONDS, // 24 hours
+  },
+  jwt: {
+    maxAge: ONE_DAY_IN_SECONDS, // 24 hours
   },
 })
