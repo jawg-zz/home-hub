@@ -104,7 +104,6 @@ export default function ChoresList({ chores: initialChores }: { chores: Chore[] 
         </label>
         <input
           id="chore-input"
-          ref={inputRef}
           type="text"
           value={newChore}
           onChange={(e) => setNewChore(e.target.value)}
@@ -190,21 +189,6 @@ export default function ChoresList({ chores: initialChores }: { chores: Chore[] 
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  )
-}
-'
                 }}
                 onBlur={(e) => {
                   e.currentTarget.style.boxShadow = 'none'
