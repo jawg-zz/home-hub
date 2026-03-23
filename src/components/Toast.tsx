@@ -111,14 +111,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         ))}
       </div>
       <style jsx global>{`
-        @keyframes slideIn {
+        @keyframes toastFadeIn {
           from {
-            transform: translateX(100%);
+            transform: translateX(100%) scale(0.9);
             opacity: 0;
           }
           to {
-            transform: translateX(0);
+            transform: translateX(0) scale(1);
             opacity: 1;
+          }
+        }
+        
+        @keyframes toastFadeOut {
+          from {
+            transform: translateX(0) scale(1);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%) scale(0.9);
+            opacity: 0;
           }
         }
       `}</style>

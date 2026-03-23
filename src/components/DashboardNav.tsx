@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -23,19 +23,69 @@ export default function DashboardNav({
   signOutAction: () => Promise<void>
 }) {
   const pathname = usePathname()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
+      {/* Mobile Hamburger Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle navigation menu"
+        aria-expanded={isMobileMenuOpen}
+        style={{
+          display: 'none',
+          position: 'fixed',
+          top: '1rem',
+          left: '1rem',
+          zIndex: 10001,
+          background: '#1a1a1a',
+          border: '1px solid #2a2a2a',
+          borderRadius: '8px',
+          padding: '0.75rem',
+          cursor: 'pointer',
+          color: '#e0e0e0',
+          fontSize: '1.25rem',
+          width: '44px',
+          height: '44px',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+        className="mobile-menu-btn"
+      >
+        {isMobileMenuOpen ? '✕' : '☰'}
+      </button>
+
+      {/* Mobile Backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          style={{
+            display: 'none',
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            zIndex: 9998,
+            animation: 'fadeIn 0.2s ease',
+          }}
+          className="mobile-backdrop"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside style={{
-        width: '260px',
-        background: '#0f0f0f',
-        borderRight: '1px solid #1a1a1a',
-        padding: '1.5rem',
-        position: 'fixed',
-        height: '100vh',
-        overflowY: 'auto',
-      }}>
+      <aside 
+        className={`sidebar ${isMobileMenuOpen ? 'sidebar-open' : ''}`}
+        style={{
+          width: '260px',
+          background: '#0f0f0f',
+          borderRight: '1px solid #1a1a1a',
+          padding: '1.5rem',
+          position: 'fixed',
+          height: '100vh',
+          overflowY: 'auto',
+          zIndex: 9999,
+          transition: 'transform 0.3s ease',
+        }}
+      >
         <div style={{ marginBottom: '2rem' }}>
           <Link href="/" style={{ 
             fontSize: '1.5rem', 
@@ -63,6 +113,7 @@ export default function DashboardNav({
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -75,6 +126,18 @@ export default function DashboardNav({
                   marginBottom: '0.25rem',
                   transition: 'all 0.2s ease',
                   outline: 'none',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'
+                    e.currentTarget.style.color = '#e0e0e0'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = '#888'
+                  }
                 }}
                 onFocus={(e) => {
                   e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
@@ -136,6 +199,15 @@ export default function DashboardNav({
               fontSize: '0.875rem',
               cursor: 'pointer',
               outline: 'none',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#ff6b35'
+              e.currentTarget.style.color = '#ff6b35'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#2a2a2a'
+              e.currentTarget.style.color = '#666'
             }}
             onFocus={(e) => {
               e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
@@ -161,6 +233,41 @@ export default function DashboardNav({
         }}>
         {children}
       </main>
+
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          .mobile-menu-btn {
+            display: flex !important;
+          }
+          
+          .mobile-backdrop {
+            display: block !important;
+          }
+          
+          .sidebar {
+            transform: translateX(-100%);
+          }
+          
+          .sidebar-open {
+            transform: translateX(0);
+          }
+          
+          main {
+            margin-left: 0 !important;
+            padding: 4rem 1rem 1rem !important;
+          }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
