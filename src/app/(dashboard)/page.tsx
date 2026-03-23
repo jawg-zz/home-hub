@@ -37,11 +37,11 @@ export default async function DashboardPage() {
     }
 
     return (
-    <div className="dashboard-container">
+    <div className="dashboard-container fade-in">
       {/* Welcome Header */}
       <header className="welcome-header">
         <div className="greeting-section">
-          <h1 className="welcome-title">
+          <h1 className="welcome-title" style={{ fontWeight: 700 }}>
             Welcome back, <span className="highlight">{session?.user?.name || 'Home'}</span> 👋
           </h1>
           <p className="date-display">
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
 
       {/* Stats Overview */}
       <section className="stats-grid">
-        <div className="stat-card primary-stat">
+        <div className="stat-card primary-stat slide-in" style={{ animationDelay: '0.1s' }}>
           <div className="stat-header">
             <span className="stat-label">Devices Online</span>
             <div className="stat-icon bg-primary-light">
@@ -78,7 +78,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         
-        <div className="stat-card secondary-stat">
+        <div className="stat-card secondary-stat slide-in" style={{ animationDelay: '0.2s' }}>
           <div className="stat-header">
             <span className="stat-label">Shopping Items</span>
             <div className="stat-icon bg-accent-light">
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="stat-card warning-stat">
+        <div className="stat-card warning-stat slide-in" style={{ animationDelay: '0.3s' }}>
           <div className="stat-header">
             <span className="stat-label">Pending Chores</span>
             <div className="stat-icon bg-warning-light">
@@ -110,7 +110,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="stat-card neutral-stat">
+        <div className="stat-card neutral-stat slide-in" style={{ animationDelay: '0.4s' }}>
           <div className="stat-header">
             <span className="stat-label">Energy Today</span>
             <div className="stat-icon bg-neutral-light">
@@ -133,7 +133,7 @@ export default async function DashboardPage() {
         {/* Quick Actions Panel */}
         <section className="panel quick-actions-panel">
           <div className="panel-header">
-            <h2 className="panel-title">Quick Actions</h2>
+            <h2 className="panel-title" style={{ fontWeight: 700 }}>Quick Actions</h2>
             <a href="/devices" className="view-all-link">View All →</a>
           </div>
           <div className="quick-actions-grid">
@@ -184,7 +184,7 @@ export default async function DashboardPage() {
           {/* Recent Activity */}
           <section className="panel recent-activity-panel">
             <div className="panel-header">
-              <h2 className="panel-title">Recent Activity</h2>
+              <h2 className="panel-title" style={{ fontWeight: 700 }}>Recent Activity</h2>
               <a href="/devices" className="view-all-link">See All →</a>
             </div>
             <div className="activity-list">
@@ -221,7 +221,7 @@ export default async function DashboardPage() {
           {/* Weather Widget */}
           <section className="panel weather-panel">
             <div className="panel-header">
-              <h2 className="panel-title">Weather</h2>
+              <h2 className="panel-title" style={{ fontWeight: 700 }}>Weather</h2>
               <a href="#" className="view-all-link">Details →</a>
             </div>
             <div className="weather-content">
