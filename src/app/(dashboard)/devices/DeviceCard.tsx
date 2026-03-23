@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/components/Toast'
 
 type Device = {
   id: string
@@ -15,6 +16,7 @@ type Device = {
 export default function DeviceCard({ device }: { device: Device }) {
   const [isOn, setIsOn] = useState(device.status === 'on' || device.status === 'locked')
   const [loading, setLoading] = useState(false)
+  const { showToast } = useToast()
 
   const toggleDevice = async () => {
     setLoading(true)
@@ -26,8 +28,10 @@ export default function DeviceCard({ device }: { device: Device }) {
         body: JSON.stringify({ status: newStatus }),
       })
       setIsOn(!isOn)
+      showToast(`${device.name} turned ${newStatus}`, 'success')
     } catch {
       console.error('Failed to toggle device')
+      showToast('Failed to toggle device', 'error')
     } finally {
       setLoading(false)
     }
@@ -104,6 +108,13 @@ export default function DeviceCard({ device }: { device: Device }) {
           cursor: !device.online || loading ? 'not-allowed' : 'pointer',
           opacity: loading ? 0.7 : 1,
           transition: 'all 0.2s ease',
+          outline: 'none',
+        }}
+        onFocus={(e) => {
+          if (device.online && !loading) e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.boxShadow = 'none'
         }}
       >
         {loading ? 'Loading...' : isOn ? 'Turn Off' : 'Turn On'}

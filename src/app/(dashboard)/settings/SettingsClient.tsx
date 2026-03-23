@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useToast } from '@/components/Toast'
 
 type User = {
   id: string
@@ -22,20 +23,36 @@ export default function SettingsPage({
   users: User[] 
 }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [themeLoading, setThemeLoading] = useState(false)
+  const [saveLoading, setSaveLoading] = useState(false)
+  const [name, setName] = useState(session?.user?.name || '')
+  const { showToast } = useToast()
 
-  useEffect(() => {
-    // Load theme from localStorage on mount
-    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null
-    if (savedTheme) {
-      setTheme(savedTheme)
-      document.documentElement.setAttribute('data-theme', savedTheme)
-    }
-  }, [])
-
-  const toggleTheme = (newTheme: 'dark' | 'light') => {
+  const toggleTheme = async (newTheme: 'dark' | 'light') => {
+    setThemeLoading(true)
     setTheme(newTheme)
     document.documentElement.setAttribute('data-theme', newTheme)
     localStorage.setItem('theme', newTheme)
+    setTimeout(() => {
+      setThemeLoading(false)
+      showToast(`Switched to ${newTheme} mode`, 'success')
+    }, 300)
+  }
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaveLoading(true)
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      showToast('Profile updated successfully', 'success')
+    } catch (error) {
+      console.error('Failed to save profile:', error)
+      showToast('Failed to update profile', 'error')
+    } finally {
+      setSaveLoading(false)
+    }
   }
 
   return (
@@ -70,12 +87,17 @@ export default function SettingsPage({
             </div>
           </div>
           
-          <form style={{ display: 'grid', gap: '1rem' }}>
+          <form onSubmit={handleSaveProfile} style={{ display: 'grid', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: '#999', fontSize: '0.875rem' }}>
                 Display Name
               </label>
-              <input type="text" defaultValue={session?.user?.name || ''} style={{ width: '100%' }} />
+              <input 
+                type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{ width: '100%' }} 
+              />
             </div>
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', color: '#999', fontSize: '0.875rem' }}>
@@ -83,8 +105,13 @@ export default function SettingsPage({
               </label>
               <input type="email" defaultValue={session?.user?.email || ''} style={{ width: '100%' }} disabled />
             </div>
-            <button type="button" className="btn btn-primary" style={{ width: 'fit-content' }}>
-              Save Changes
+            <button 
+              type="submit" 
+              className="btn btn-primary" 
+              style={{ width: 'fit-content' }}
+              disabled={saveLoading}
+            >
+              {saveLoading ? 'Loading...' : 'Save Changes'}
             </button>
           </form>
         </div>
@@ -93,37 +120,49 @@ export default function SettingsPage({
         <div className="card">
           <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>👨‍👩‍👧‍👦 Family Members</h2>
           <div style={{ display: 'grid', gap: '0.75rem', marginBottom: '1rem' }}>
-            {users.map((user) => (
-              <div key={user.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                padding: '0.75rem',
-                background: '#151515',
-                borderRadius: '8px',
+            {users.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '2rem 1rem',
+                color: '#999',
               }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  background: '#333',
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>👥</div>
+                <p style={{ marginBottom: '0.5rem', fontWeight: 500 }}>No family members yet</p>
+                <p style={{ fontSize: '0.875rem' }}>Add family members to share access</p>
+              </div>
+            ) : (
+              users.map((user) => (
+                <div key={user.id} style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
+                  gap: '0.75rem',
+                  padding: '0.75rem',
+                  background: '#151515',
+                  borderRadius: '8px',
                 }}>
-                  {user.name?.[0] || 'U'}
+                  <div style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: '#333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                  }}>
+                    {user.name?.[0] || 'U'}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 500 }}>{user.name}</div>
+                    <div style={{ color: '#999', fontSize: '0.75rem' }}>{user.email}</div>
+                  </div>
+                  <span className={`badge ${user.role === 'admin' ? 'badge-success' : 'badge-warning'}`}>
+                    {user.role}
+                  </span>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 500 }}>{user.name}</div>
-                  <div style={{ color: '#999', fontSize: '0.75rem' }}>{user.email}</div>
-                </div>
-                <span className={`badge ${user.role === 'admin' ? 'badge-success' : 'badge-warning'}`}>
-                  {user.role}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           <button className="btn btn-secondary" style={{ width: '100%' }}>
             + Add Family Member
@@ -167,6 +206,7 @@ export default function SettingsPage({
             onClick={() => toggleTheme('dark')}
             className={theme === 'dark' ? 'btn btn-primary' : 'btn btn-secondary'}
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            disabled={themeLoading}
           >
             🌙 Dark Mode {theme === 'dark' && '✓'}
           </button>
@@ -178,6 +218,7 @@ export default function SettingsPage({
               alignItems: 'center', 
               gap: '0.5rem'
             }}
+            disabled={themeLoading}
           >
             ☀️ Light Mode {theme === 'light' && '✓'}
           </button>

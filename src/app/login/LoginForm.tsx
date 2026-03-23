@@ -9,12 +9,34 @@ export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
+    setEmailError('')
+    setPasswordError('')
+
+    // Validation
+    let hasError = false
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address')
+      hasError = true
+    }
+    if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters')
+      hasError = true
+    }
+    if (hasError) return
+
+    setLoading(true)
 
     try {
       const result = await signIn('credentials', {
@@ -69,11 +91,28 @@ export default function LoginForm() {
         <input
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value)
+            setEmailError('')
+          }}
           required
-          style={{ width: '100%' }}
+          style={{ 
+            width: '100%',
+            outline: 'none',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.boxShadow = 'none'
+          }}
           placeholder="you@example.com"
         />
+        {emailError && (
+          <div style={{ color: '#ff6b35', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+            {emailError}
+          </div>
+        )}
       </div>
 
       <div style={{ marginBottom: '1.5rem' }}>
@@ -88,11 +127,28 @@ export default function LoginForm() {
         <input
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value)
+            setPasswordError('')
+          }}
           required
-          style={{ width: '100%' }}
+          style={{ 
+            width: '100%',
+            outline: 'none',
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.boxShadow = 'none'
+          }}
           placeholder="••••••••"
         />
+        {passwordError && (
+          <div style={{ color: '#ff6b35', fontSize: '0.75rem', marginTop: '0.25rem' }}>
+            {passwordError}
+          </div>
+        )}
       </div>
 
       <button
@@ -109,6 +165,13 @@ export default function LoginForm() {
           fontSize: '1rem',
           cursor: loading ? 'not-allowed' : 'pointer',
           transition: 'all 0.2s ease',
+          outline: 'none',
+        }}
+        onFocus={(e) => {
+          if (!loading) e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.boxShadow = 'none'
         }}
       >
         {loading ? 'Signing in...' : 'Sign In'}
