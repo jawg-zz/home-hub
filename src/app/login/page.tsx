@@ -49,7 +49,7 @@ export default async function LoginPage() {
             fontSize: "0.875rem",
           }}
         >
-          Demo: demo@home.com / Demo@123!
+          Demo: demo@home.com / Demo123!
         </p>
       </div>
     </div>
