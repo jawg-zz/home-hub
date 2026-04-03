@@ -7,9 +7,13 @@ async function main() {
   // Create demo user
   const hashedPassword = await bcrypt.hash("Demo123!", 10);
 
+  console.log("[Seed] Creating/updating demo user with password: Demo123!");
+
   await prisma.user.upsert({
     where: { email: "demo@home.com" },
-    update: {},
+    update: {
+      password: hashedPassword, // Update password if user exists
+    },
     create: {
       email: "demo@home.com",
       password: hashedPassword,
@@ -17,6 +21,8 @@ async function main() {
       role: "admin",
     },
   });
+
+  console.log("[Seed] Demo user ready: demo@home.com / Demo123!");
 
   // Create mock devices
   const devices = [
