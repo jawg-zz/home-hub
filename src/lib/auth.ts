@@ -27,6 +27,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        console.log(`[Auth] Login attempt for: ${credentials.email}`);
+        console.log(`[Auth] Password length: ${(credentials.password as string).length}`);
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email as string },
         });
@@ -36,10 +39,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        console.log(`[Auth] User found, hash length: ${user.password.length}`);
+
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.password,
         );
+
+        console.log(`[Auth] Password comparison result: ${isValid}`);
 
         if (!isValid) {
           console.error(`[Auth] Invalid password for: ${credentials.email}`);
