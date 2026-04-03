@@ -23,6 +23,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.error("[Auth] Missing credentials");
           return null;
         }
 
@@ -31,6 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         if (!user) {
+          console.error(`[Auth] User not found: ${credentials.email}`);
           return null;
         }
 
@@ -40,9 +42,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         );
 
         if (!isValid) {
+          console.error(`[Auth] Invalid password for: ${credentials.email}`);
           return null;
         }
 
+        console.log(`[Auth] Login successful: ${credentials.email}`);
         return {
           id: user.id,
           email: user.email,
