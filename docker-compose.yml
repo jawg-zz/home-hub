@@ -8,25 +8,25 @@ services:
     ports:
       - "5000:3000"
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/homehub
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@home-db:5432/homehub
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-XpNdwXxbMIrXLRDWTUJkdJcu5HW8kFJUj8WrPTr1XuE=}
       - NEXTAUTH_URL=https://home.spidmax.win
       - NODE_ENV=${NODE_ENV:-production}
     depends_on:
-      postgres:
+      home-db:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - dokploy-network
 
-  postgres:
+  home-db:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: homehub
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - home_db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -37,7 +37,7 @@ services:
       - dokploy-network
 
 volumes:
-  postgres_data:
+  home_db_data:
 
 networks:
   dokploy-network:
