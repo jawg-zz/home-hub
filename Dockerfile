@@ -9,11 +9,7 @@ RUN npm ci --legacy-peer-deps
 
 COPY . .
 
-# Set DATABASE_URL for Prisma during build
-ENV DATABASE_URL="file:./prisma/dev.db"
-
 RUN npx prisma generate
-RUN npx prisma db push && npx tsx prisma/seed.ts
 RUN npm run build
 
 FROM node:20-alpine
@@ -30,4 +26,5 @@ COPY --from=builder /app/prisma ./prisma
 ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Run migrations and seed on container start, then start the app
+CMD npx prisma db push && npx tsx prisma/seed.ts && npm start
