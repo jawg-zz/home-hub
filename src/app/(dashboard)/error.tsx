@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { logger } from '@/lib/logger'
+import { useEffect } from "react";
+import { logger } from "@/lib/logger";
 
 export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
   useEffect(() => {
-    logger.error('Page error boundary caught error', {
+    logger.error("Page error boundary caught error", {
       message: error.message,
       stack: error.stack,
       digest: error.digest,
-    })
-  }, [error])
+    });
+  }, [error]);
 
   return (
     <div className="error-container">
@@ -24,17 +24,12 @@ export default function Error({
         <div className="error-icon">⚠️</div>
         <h2>Something went wrong</h2>
         <p className="error-message">
-          {error.message || 'An unexpected error occurred'}
+          {error.message || "An unexpected error occurred"}
         </p>
         {error.digest && (
-          <p className="error-digest">
-            Error ID: {error.digest}
-          </p>
+          <p className="error-digest">Error ID: {error.digest}</p>
         )}
-        <button
-          onClick={reset}
-          className="btn btn-primary"
-        >
+        <button onClick={reset} className="btn btn-primary">
           Try again
         </button>
       </div>
@@ -66,5 +61,5 @@ export default function Error({
         }
       `}</style>
     </div>
-  )
+  );
 }

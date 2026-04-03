@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Home Hub - Smart Home Management Dashboard
+
+A modern smart home management dashboard built with Next.js, Prisma, and SQLite/PostgreSQL.
+
+## Features
+
+- **Device Management**: Control smart devices (lights, locks, thermostats, etc.)
+- **Household Tasks**: Manage shopping lists and chores
+- **Energy Monitoring**: Track energy consumption with charts
+- **Role-Based Access Control**: Admin, member, and viewer roles
+- **Security**: Input sanitization, password validation, rate limiting
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, React 18, Recharts
+- **Backend**: Next.js API Routes
+- **Database**: SQLite (local) / PostgreSQL (production)
+- **ORM**: Prisma
+- **Authentication**: NextAuth.js
+- **Validation**: Zod
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Set up the database:
+
+**For local development (SQLite):**
+
+```bash
+npx prisma db push
+npm run db:seed  # Optional: seed demo data
+```
+
+**For production (PostgreSQL):**
+
+```bash
+# Update DATABASE_URL in .env to your PostgreSQL connection string
+npx prisma db push
+```
+
+3. Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo Credentials
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Email: demo@home.com
+- Password: Demo@123!
 
-## Learn More
+## Database Configuration
 
-To learn more about Next.js, take a look at the following resources:
+### Environment Variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Create a `.env` file based on `.env.example`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+# For local development (SQLite)
+DATABASE_URL="file:./dev.db"
 
-## Deploy on Vercel
+# For production (PostgreSQL)
+# DATABASE_URL="postgresql://user:password@localhost:5432/homehub?schema=public"
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Generating a Secure Secret
+
+```bash
+openssl rand -base64 32
+```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run TypeScript check
+- `npm run test` - Run tests
+- `npm run db:seed` - Seed database with demo data
+
+## API Endpoints
+
+### Devices
+
+- `GET /api/devices` - List all devices
+- `POST /api/devices` - Create device (admin only)
+- `GET /api/devices/[id]` - Get device
+- `PATCH /api/devices/[id]` - Update device
+- `DELETE /api/devices/[id]` - Delete device (admin only)
+
+### Chores
+
+- `GET /api/chores` - List all chores
+- `POST /api/chores` - Create chore (member+)
+- `PATCH /api/chores/[id]` - Update chore (member+)
+- `DELETE /api/chores/[id]` - Delete chore (member+)
+
+### Shopping
+
+- `GET /api/shopping` - List all items
+- `POST /api/shopping` - Create item (member+)
+- `PATCH /api/shopping/[id]` - Update item (member+)
+- `DELETE /api/shopping/[id]` - Delete item (member+)
+
+## Security Features
+
+- Input sanitization with DOMPurify
+- Password validation (min 8 chars, uppercase, lowercase, number, special char)
+- Rate limiting on auth endpoints (5 attempts per 15 minutes)
+- Role-based access control
+
+## License
+
+MIT

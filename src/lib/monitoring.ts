@@ -1,13 +1,13 @@
-import { logger } from './logger'
+import { logger } from "./logger";
 
 interface PerformanceMetric {
-  name: string
-  duration: number
-  metadata?: Record<string, unknown>
+  name: string;
+  duration: number;
+  metadata?: Record<string, unknown>;
 }
 
 class Monitoring {
-  private startTime = Date.now()
+  private startTime = Date.now();
 
   /**
    * Track performance of an operation
@@ -15,28 +15,28 @@ class Monitoring {
   async trackPerformance<T>(
     name: string,
     fn: () => Promise<T>,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
   ): Promise<T> {
-    const start = performance.now()
+    const start = performance.now();
     try {
-      const result = await fn()
-      const duration = performance.now() - start
-      
-      this.recordMetric({ name, duration, metadata })
-      
+      const result = await fn();
+      const duration = performance.now() - start;
+
+      this.recordMetric({ name, duration, metadata });
+
       if (duration > 1000) {
-        logger.warn(`Slow operation: ${name}`, { duration, ...metadata })
+        logger.warn(`Slow operation: ${name}`, { duration, ...metadata });
       }
-      
-      return result
+
+      return result;
     } catch (error) {
-      const duration = performance.now() - start
+      const duration = performance.now() - start;
       logger.error(`Operation failed: ${name}`, {
         duration,
         error: error instanceof Error ? error.message : String(error),
         ...metadata,
-      })
-      throw error
+      });
+      throw error;
     }
   }
 
@@ -47,12 +47,12 @@ class Monitoring {
     // TODO: Send to APM service (New Relic/DataDog)
     // Example:
     // newrelic.recordMetric(metric.name, metric.duration)
-    
-    if (process.env.NODE_ENV === 'development') {
+
+    if (process.env.NODE_ENV === "development") {
       logger.debug(`Performance: ${metric.name}`, {
         duration: `${metric.duration.toFixed(2)}ms`,
         ...metric.metadata,
-      })
+      });
     }
   }
 
@@ -63,8 +63,8 @@ class Monitoring {
     logger.error(error.message, {
       stack: error.stack,
       ...context,
-    })
-    
+    });
+
     // TODO: Send to error tracking service (Sentry)
     // Sentry.captureException(error, { extra: context })
   }
@@ -73,18 +73,18 @@ class Monitoring {
    * Get application uptime in seconds
    */
   getUptime(): number {
-    return Math.floor((Date.now() - this.startTime) / 1000)
+    return Math.floor((Date.now() - this.startTime) / 1000);
   }
 
   /**
    * Record a custom event
    */
   recordEvent(name: string, properties?: Record<string, unknown>) {
-    logger.info(`Event: ${name}`, properties)
-    
+    logger.info(`Event: ${name}`, properties);
+
     // TODO: Send to analytics service
     // analytics.track(name, properties)
   }
 }
 
-export const monitoring = new Monitoring()
+export const monitoring = new Monitoring();

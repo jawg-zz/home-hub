@@ -19,6 +19,8 @@
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
+    "express-rate-limit": "^8.3.2",
+    "isomorphic-dompurify": "^3.7.1",
     "next": "^16.2.1",
     "next-auth": "^5.0.0-beta.30",
     "prisma": "^5.22.0",
@@ -40,11 +42,13 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/ui": "^2.1.9",
+    "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/ui": "^4.1.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.35",
     "jsdom": "^29.0.1",
+    "prettier": "^3.8.1",
     "typescript": "5.9.3",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.2"
   }
 }
