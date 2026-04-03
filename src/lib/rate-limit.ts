@@ -66,6 +66,11 @@ export async function withRateLimit(
   request: Request,
   handler: () => Promise<NextResponse>,
 ): Promise<NextResponse> {
+  // Skip rate limiting in development
+  if (process.env.NODE_ENV === "development") {
+    return handler();
+  }
+
   const result = await authRateLimiter(request);
 
   if (!result.allowed) {

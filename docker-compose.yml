@@ -9,8 +9,9 @@ services:
       - "5000:3000"
     environment:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/homehub
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-home-hub-secret-key-change-in-production}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-XpNdwXxbMIrXLRDWTUJkdJcu5HW8kFJUj8WrPTr1XuE=}
       - NEXTAUTH_URL=https://home.spidmax.win
+      - NODE_ENV=${NODE_ENV:-production}
     depends_on:
       postgres:
         condition: service_healthy
