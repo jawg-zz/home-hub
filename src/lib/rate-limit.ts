@@ -59,18 +59,13 @@ export function createRateLimiter(config: RateLimitConfig) {
 
 export const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  maxRequests: process.env.NODE_ENV === "development" ? 1000 : 20, // More forgiving in production
+  maxRequests: 20, // 20 requests per 15 minutes
 });
 
 export async function withRateLimit(
   request: Request,
   handler: () => Promise<NextResponse>,
 ): Promise<NextResponse> {
-  // Skip rate limiting in development
-  if (process.env.NODE_ENV === "development") {
-    return handler();
-  }
-
   const result = await authRateLimiter(request);
 
   if (!result.allowed) {
