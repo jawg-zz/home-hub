@@ -4,8 +4,9 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   NEXTAUTH_SECRET: z
     .string()
-    .min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
-  NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL'),
+    .min(32, 'NEXTAUTH_SECRET must be at least 32 characters')
+    .optional(),
+  NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL').optional(),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),
