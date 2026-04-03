@@ -39,31 +39,33 @@
 - ✅ Fixed duplicate code issues
 - ✅ Fixed runtime errors (trustHost, event handlers)
 
-## Remaining Issues (From Round 2 Review)
+## Session 2: Codebase Improvements (2026-04-03)
 
-### Performance (Low Priority)
-- Unnecessary re-renders (need React.memo)
-- No debouncing on inputs
-- Charts reload every visit (need caching/SWR)
+### Critical Fixes
+- ✅ Fixed next.config.mjs - moved serverExternalPackages to correct location
+- ✅ Added .env to .gitignore (security)
+- ✅ Fixed rate limiter middleware logic bug (wasn't blocking properly after limit)
+- ✅ Fixed weak NEXTAUTH_SECRET in .env
+- ✅ Added consistent error handling and logging to all API routes
 
-### Polish (Low Priority)
-- Inconsistent spacing
-- No animations/transitions
-- Responsive design gaps (mobile hamburger menu)
-- Visual hierarchy could be improved
-- Missing micro-interactions
+### New Features
+- ✅ Created full Device CRUD API endpoints (GET, POST, PATCH, DELETE)
+- ✅ Added deviceSchema validation
+- ✅ Created role-based access control module (src/lib/rbac.ts)
+- ✅ Created .env.example template
 
-### Production Readiness
-- Environment variable validation needed
-- Error logging strategy
-- Monitoring/observability
-- Session expiration configuration
-- CORS configuration for production
+### API Improvements
+- ✅ Device toggle route now has proper error handling and logging
+- ✅ Chores [id] route now has proper error handling and logging
+- ✅ Shopping [id] route now has proper error handling and logging
+- ✅ All API routes now use consistent error response format
 
-## Next Steps
+### Error Handling
+- ✅ Improved error boundary component with better UX
+- ✅ Added proper Prisma error handling (P2025 for not found)
+- ✅ Added retry-after header for rate limiting
 
-1. **Performance optimization** - Add React.memo, implement caching
-2. **Responsive design** - Mobile hamburger menu, better breakpoints
-3. **Animations** - Add transitions and micro-interactions
-4. **Production config** - Environment validation, monitoring setup
-5. **Documentation** - API docs, deployment guide, user manual
+### Build & Configuration
+- ✅ Tests directory setup (src/__tests__/)
+- ✅ Test setup file with mocks
+- ✅ Package.json updated with test scripts

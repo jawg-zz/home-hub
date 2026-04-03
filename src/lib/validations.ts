@@ -22,3 +22,12 @@ export const choreUpdateSchema = z.object({
 export const deviceStatusSchema = z.object({
   status: z.enum(['on', 'off', 'locked']),
 })
+
+export const deviceSchema = z.object({
+  name: z.string().min(1).max(100),
+  type: z.string().min(1).max(50),
+  room: z.string().min(1).max(100),
+  status: z.enum(['on', 'off', 'locked']).default('off'),
+  value: z.number().int().min(0).max(100).default(0),
+  online: z.boolean().default(false),
+})

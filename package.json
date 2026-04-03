@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@libsql/client": "^0.17.2",
@@ -27,12 +30,18 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20.19.37",
     "@types/react": "18.3.28",
     "@types/react-dom": "^18",
     "@types/wcag-contrast": "^3.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/ui": "^2.1.9",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
-    "typescript": "5.9.3"
+    "jsdom": "^29.0.1",
+    "typescript": "5.9.3",
+    "vitest": "^2.1.9"
   }
 }

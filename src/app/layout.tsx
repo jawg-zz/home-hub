@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, DM_Sans } from "next/font/google";
 import "./globals.css";
+import "@/lib/env";
 
 const outfit = Outfit({ 
   subsets: ["latin"],

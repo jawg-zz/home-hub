@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -24,14 +24,49 @@ export default function DashboardNav({
 }) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
+
+  // Handle escape key to close mobile menu
+  const handleEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && isMobileMenuOpen) {
+      setIsClosing(true)
+      setTimeout(() => {
+        setIsMobileMenuOpen(false)
+        setIsClosing(false)
+      }, 300)
+    }
+  }, [isMobileMenuOpen])
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [handleEscape])
+
+  // Close menu on route change
+  useEffect(() => {
+    setIsClosing(true)
+    setTimeout(() => {
+      setIsMobileMenuOpen(false)
+      setIsClosing(false)
+    }, 300)
+  }, [pathname])
+
+  const closeMenu = () => {
+    setIsClosing(true)
+    setTimeout(() => {
+      setIsMobileMenuOpen(false)
+      setIsClosing(false)
+    }, 300)
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       {/* Mobile Hamburger Button */}
       <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        onClick={() => isMobileMenuOpen ? closeMenu() : setIsMobileMenuOpen(true)}
         aria-label="Toggle navigation menu"
         aria-expanded={isMobileMenuOpen}
+        aria-controls="mobile-sidebar"
         style={{
           display: 'none',
           position: 'fixed',
@@ -49,31 +84,46 @@ export default function DashboardNav({
           height: '44px',
           alignItems: 'center',
           justifyContent: 'center',
+          transition: 'all 0.2s ease',
         }}
         className="mobile-menu-btn"
+        onFocus={(e) => {
+          e.currentTarget.style.boxShadow = '0 0 0 2px #00d4aa'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.boxShadow = 'none'
+        }}
       >
-        {isMobileMenuOpen ? '✕' : '☰'}
+        <span style={{
+          display: 'inline-block',
+          transition: 'transform 0.3s ease, opacity 0.3s ease',
+          transform: isMobileMenuOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+        }}>
+          {isMobileMenuOpen ? '✕' : '☰'}
+        </span>
       </button>
 
       {/* Mobile Backdrop */}
-      {isMobileMenuOpen && (
+      {(isMobileMenuOpen || isClosing) && (
         <div
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={closeMenu}
           style={{
             display: 'none',
             position: 'fixed',
             inset: 0,
             background: 'rgba(0, 0, 0, 0.7)',
             zIndex: 9998,
-            animation: 'fadeIn 0.2s ease',
+            animation: isClosing ? 'fadeOut 0.3s ease forwards' : 'fadeIn 0.2s ease',
           }}
           className="mobile-backdrop"
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <aside 
-        className={`sidebar ${isMobileMenuOpen ? 'sidebar-open' : ''}`}
+        id="mobile-sidebar"
+        className={`sidebar ${isMobileMenuOpen ? 'sidebar-open' : ''} ${isClosing ? 'sidebar-closing' : ''}`}
         style={{
           width: '260px',
           background: '#0f0f0f',
@@ -83,8 +133,9 @@ export default function DashboardNav({
           height: '100vh',
           overflowY: 'auto',
           zIndex: 9999,
-          transition: 'transform 0.3s ease',
         }}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <div style={{ marginBottom: '2rem' }}>
           <Link href="/" style={{ 
@@ -246,10 +297,17 @@ export default function DashboardNav({
           
           .sidebar {
             transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
           
           .sidebar-open {
             transform: translateX(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          
+          .sidebar-closing {
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           }
           
           main {
@@ -261,6 +319,11 @@ export default function DashboardNav({
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
         }
         
         @keyframes spin {
