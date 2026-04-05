@@ -24,7 +24,15 @@ export async function PATCH(
 
   try {
     const { id } = await params;
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        createErrorResponse("Invalid JSON body", 400),
+        { status: 400 },
+      );
+    }
     const sanitized = sanitizeObject(body);
     const validated = choreUpdateSchema.parse(sanitized);
 

@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { monitoring } from "@/lib/monitoring";
 import { getRequestId, createErrorResponse } from "@/lib/request";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 export async function POST(
   request: Request,
@@ -24,7 +25,15 @@ export async function POST(
 
   try {
     const { id } = await params;
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        createErrorResponse("Invalid JSON body", 400),
+        { status: 400 },
+      );
+    }
     const validated = deviceStatusSchema.parse(body);
 
     const device = await monitoring.trackPerformance(
@@ -53,6 +62,15 @@ export async function POST(
         createErrorResponse("Invalid device status", 400, error.issues),
         { status: 400 },
       );
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json(createErrorResponse("Device not found", 404), {
+        status: 404,
+      });
     }
 
     monitoring.trackError(

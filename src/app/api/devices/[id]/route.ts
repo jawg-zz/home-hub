@@ -6,7 +6,7 @@ import { logger } from "@/lib/logger";
 import { monitoring } from "@/lib/monitoring";
 import { getRequestId, createErrorResponse } from "@/lib/request";
 import { sanitizeObject } from "@/lib/sanitize";
-import { requireAdmin } from "@/lib/rbac";
+import { requireAdmin, requireRole } from "@/lib/rbac";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 
@@ -60,17 +60,22 @@ export async function PATCH(
   const requestId = await getRequestId();
 
   try {
-    const session = await auth();
-    if (!session) {
+    const roleCheck = await requireRole("member");
+    if (roleCheck instanceof NextResponse) {
       logger.warn("Unauthorized device update attempt", { requestId });
-      return NextResponse.json(
-        createErrorResponse("Please sign in to continue", 401),
-        { status: 401 },
-      );
+      return roleCheck;
     }
 
     const { id } = await params;
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        createErrorResponse("Invalid JSON body", 400),
+        { status: 400 },
+      );
+    }
     const sanitized = sanitizeObject(body);
     const validated = deviceSchema.partial().parse(sanitized);
 
@@ -81,7 +86,7 @@ export async function PATCH(
           where: { id },
           data: validated,
         }),
-      { requestId, userId: session.user.id, deviceId: id },
+      { requestId, userId: roleCheck.user.id, deviceId: id },
     );
 
     logger.info("Device updated", { requestId, deviceId: id });

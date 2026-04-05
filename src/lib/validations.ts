@@ -51,7 +51,7 @@ export const deviceStatusSchema = z.object({
 
 export const deviceSchema = z.object({
   name: z.string().min(1).max(100),
-  type: z.string().min(1).max(50),
+  type: z.enum(["light", "lock", "thermostat", "camera", "sensor", "switch", "outlet", "other"]),
   room: z.string().min(1).max(100),
   status: z.enum(["on", "off", "locked"]).default("off"),
   value: z.number().int().min(0).max(100).default(0),

@@ -27,6 +27,7 @@ export async function GET() {
       async () =>
         prisma.device.findMany({
           orderBy: { updatedAt: "desc" },
+          take: 100,
         }),
       { requestId, userId: session.user.id },
     );

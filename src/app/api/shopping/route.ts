@@ -25,7 +25,7 @@ export async function GET() {
     const items = await monitoring.trackPerformance(
       "shopping-list-fetch",
       async () =>
-        prisma.shoppingItem.findMany({ orderBy: { createdAt: "desc" } }),
+        prisma.shoppingItem.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
       { requestId, userId: session.user.id },
     );
 
@@ -51,7 +51,15 @@ export async function POST(request: Request) {
       return roleCheck;
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        createErrorResponse("Invalid JSON body", 400),
+        { status: 400 },
+      );
+    }
     const sanitized = sanitizeObject(body);
     const validated = shoppingItemSchema.parse(sanitized);
 
