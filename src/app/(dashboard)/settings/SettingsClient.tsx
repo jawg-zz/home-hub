@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/Toast";
 
 type User = {
@@ -28,6 +28,32 @@ export default function SettingsPage({
   const [name, setName] = useState(session?.user?.name || "");
   const { showToast } = useToast();
 
+  const [haUrl, setHaUrl] = useState("");
+  const [haToken, setHaToken] = useState("");
+  const [haConnected, setHaConnected] = useState(false);
+  const [haLoading, setHaLoading] = useState(false);
+
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState("");
+  const [newMemberName, setNewMemberName] = useState("");
+  const [newMemberPassword, setNewMemberPassword] = useState("");
+  const [newMemberRole, setNewMemberRole] = useState<"member" | "viewer">("viewer");
+  const [addMemberLoading, setAddMemberLoading] = useState(false);
+
+  const isAdmin = session?.user?.email === "demo@home.com";
+
+  useEffect(() => {
+    fetch("/api/home-assistant")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.haUrl) {
+          setHaUrl(data.haUrl);
+          setHaConnected(data.isConnected);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const toggleTheme = async (newTheme: "dark" | "light") => {
     setThemeLoading(true);
     setTheme(newTheme);
@@ -44,14 +70,113 @@ export default function SettingsPage({
     setSaveLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch("/api/user", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update profile");
+      }
+
       showToast("Profile updated successfully", "success");
     } catch (error) {
       console.error("Failed to save profile:", error);
       showToast("Failed to update profile", "error");
     } finally {
       setSaveLoading(false);
+    }
+  };
+
+  const handleHaConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!haUrl || !haToken) {
+      showToast("Please enter both HA URL and token", "error");
+      return;
+    }
+
+    setHaLoading(true);
+    try {
+      const response = await fetch("/api/home-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ haUrl, haToken }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to connect");
+      }
+
+      setHaConnected(data.isConnected);
+      if (data.isConnected) {
+        showToast("Connected to Home Assistant", "success");
+      } else {
+        showToast("Could not connect to Home Assistant", "error");
+      }
+    } catch (error) {
+      console.error("HA connection error:", error);
+      showToast("Failed to connect to Home Assistant", "error");
+    } finally {
+      setHaLoading(false);
+    }
+  };
+
+  const handleHaDisconnect = async () => {
+    setHaLoading(true);
+    try {
+      await fetch("/api/home-assistant", { method: "DELETE" });
+      setHaConnected(false);
+      setHaUrl("");
+      setHaToken("");
+      showToast("Disconnected from Home Assistant", "success");
+    } catch (error) {
+      showToast("Failed to disconnect", "error");
+    } finally {
+      setHaLoading(false);
+    }
+  };
+
+  const handleAddMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMemberEmail || !newMemberName || !newMemberPassword) {
+      showToast("Please fill in all fields", "error");
+      return;
+    }
+
+    setAddMemberLoading(true);
+    try {
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: newMemberEmail,
+          name: newMemberName,
+          password: newMemberPassword,
+          role: newMemberRole,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to add member");
+      }
+
+      showToast("Family member added successfully", "success");
+      setShowAddMember(false);
+      setNewMemberEmail("");
+      setNewMemberName("");
+      setNewMemberPassword("");
+      window.location.reload();
+    } catch (error) {
+      console.error("Add member error:", error);
+      showToast(error instanceof Error ? error.message : "Failed to add member", "error");
+    } finally {
+      setAddMemberLoading(false);
     }
   };
 
@@ -220,9 +345,68 @@ export default function SettingsPage({
               ))
             )}
           </div>
-          <button className="btn btn-secondary" style={{ width: "100%" }}>
-            + Add Family Member
-          </button>
+          {isAdmin && (
+            <button 
+              className="btn btn-secondary" 
+              style={{ width: "100%" }}
+              onClick={() => setShowAddMember(!showAddMember)}
+            >
+              + Add Family Member
+            </button>
+          )}
+          {showAddMember && (
+            <form onSubmit={handleAddMember} style={{ marginTop: "1rem" }}>
+              <div style={{ display: "grid", gap: "0.75rem" }}>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={newMemberName}
+                  onChange={(e) => setNewMemberName(e.target.value)}
+                  style={{ width: "100%" }}
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={newMemberEmail}
+                  onChange={(e) => setNewMemberEmail(e.target.value)}
+                  style={{ width: "100%" }}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={newMemberPassword}
+                  onChange={(e) => setNewMemberPassword(e.target.value)}
+                  style={{ width: "100%" }}
+                />
+                <select
+                  value={newMemberRole}
+                  onChange={(e) => setNewMemberRole(e.target.value as "member" | "viewer")}
+                  style={{ width: "100%" }}
+                >
+                  <option value="viewer">Viewer</option>
+                  <option value="member">Member</option>
+                </select>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={addMemberLoading}
+                    style={{ flex: 1 }}
+                  >
+                    {addMemberLoading ? "Adding..." : "Add"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowAddMember(false)}
+                    style={{ flex: 1 }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
         </div>
       </div>
 
@@ -232,10 +416,12 @@ export default function SettingsPage({
           🏠 Home Assistant Integration
         </h2>
         <p style={{ color: "#999", marginBottom: "1rem" }}>
-          Connect to your Home Assistant instance to sync devices and control
-          them from here.
+          {haConnected
+            ? "Connected to Home Assistant. You can now control your HA devices."
+            : "Connect to your Home Assistant instance to sync devices and control them from here."}
         </p>
         <form
+          onSubmit={handleHaConnect}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr auto",
@@ -257,7 +443,10 @@ export default function SettingsPage({
             <input
               type="url"
               placeholder="http://homeassistant:8123"
+              value={haUrl}
+              onChange={(e) => setHaUrl(e.target.value)}
               style={{ width: "100%" }}
+              disabled={haConnected}
             />
           </div>
           <div>
@@ -274,13 +463,49 @@ export default function SettingsPage({
             <input
               type="password"
               placeholder="Paste your token"
+              value={haToken}
+              onChange={(e) => setHaToken(e.target.value)}
               style={{ width: "100%" }}
+              disabled={haConnected}
             />
           </div>
-          <button type="button" className="btn btn-primary">
-            Connect
-          </button>
+          {haConnected ? (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleHaDisconnect}
+              disabled={haLoading}
+            >
+              {haLoading ? "Loading..." : "Disconnect"}
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={haLoading}
+            >
+              {haLoading ? "Connecting..." : "Connect"}
+            </button>
+          )}
         </form>
+        {haConnected && (
+          <div
+            style={{
+              marginTop: "1rem",
+              padding: "0.75rem",
+              background: "rgba(0, 212, 170, 0.1)",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <span style={{ color: "#00d4aa" }}>✓</span>
+            <span style={{ color: "#00d4aa" }}>
+              Connected to {haUrl}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Appearance */}

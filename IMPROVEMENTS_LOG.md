@@ -75,7 +75,7 @@
 
 ### Build & Configuration
 
-- ✅ Tests directory setup (src/**tests**/)
+- ✅ Tests directory setup (src/__tests__/)
 - ✅ Test setup file with mocks
 - ✅ Package.json updated with test scripts
 
@@ -99,3 +99,57 @@
 
 - ✅ Added select optimization - queries fetch only needed fields
 - ✅ Added index on EnergyReading.date for time-range queries
+
+## Session 4: Feature Completion (2026-04-05)
+
+### Weather API
+
+- ✅ Created /api/weather route using Open-Meteo API (free, no key required)
+- ✅ Integrated real weather data into dashboard (temperature, humidity, wind, feels-like)
+- ✅ Weather widget now fetches live data with 10-minute caching
+- ✅ Location: Nairobi, Kenya (default)
+
+### Profile & Settings
+
+- ✅ Created /api/user route for profile management
+- ✅ Profile "Save Changes" now actually updates the database
+- ✅ Added Zod validation for profile updates
+
+### Home Assistant Integration
+
+- ✅ Added HomeAssistantConfig model to Prisma schema
+- ✅ Created /api/home-assistant route (GET, POST, DELETE)
+- ✅ Created /api/home-assistant/devices route to fetch HA entities
+- ✅ Settings page HA form now functional:
+  - Connect/disconnect buttons work
+  - Connection test on save
+  - Shows connected status indicator
+
+### Security Features
+
+- ✅ Added Camera, Lock, SecurityAlert models to Prisma schema
+- ✅ Created /api/security/cameras route (GET, POST)
+- ✅ Created /api/security/locks route (GET, POST)
+- ✅ Created /api/security/alerts route (GET, POST, PATCH)
+- ✅ Security page now reads from database when data exists
+- ✅ Falls back to mock data when no database records
+
+### Family Members
+
+- ✅ Added createUserSchema to validations.ts
+- ✅ Created /api/users route (GET, POST) for admin user management
+- ✅ Settings "Add Family Member" button now functional (admin only)
+- ✅ Shows form with name, email, password, role fields
+
+### Dashboard
+
+- ✅ "Add Device" button now links to /devices?add=true
+- ✅ "New Task" button now links to /household?add=chore
+
+### Database Schema Updates
+
+- ✅ HomeAssistantConfig model added
+- ✅ Camera model added with user relation
+- ✅ Lock model added with user relation
+- ✅ SecurityAlert model added with user relation
+- ✅ All models have proper indexes

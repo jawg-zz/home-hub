@@ -57,3 +57,10 @@ export const deviceSchema = z.object({
   value: z.number().int().min(0).max(100).default(0),
   online: z.boolean().default(false),
 });
+
+export const createUserSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(1).max(100),
+  role: z.enum(["admin", "member", "viewer"]).default("viewer"),
+});

@@ -62,10 +62,10 @@
 
 ### Weather Widget
 
-- [ ] Current temperature displays
-- [ ] Location shows (Nairobi, Kenya)
-- [ ] Weather condition displays
-- [ ] Humidity, wind, feels-like show correctly
+- [x] Current temperature displays
+- [x] Location shows (Nairobi, Kenya)
+- [x] Weather condition displays
+- [x] Humidity, wind, feels-like show correctly
 
 ---
 
@@ -194,9 +194,11 @@
 
 ### Home Assistant Integration
 
-- [ ] Form fields present (HA URL, Token)
-- [ ] "Connect" button present
-- [ ] Form is non-functional (placeholder)
+- [x] Form fields present (HA URL, Token)
+- [x] "Connect" button present
+- [x] Form now functional (connects to HA instance)
+- [x] Disconnect button works
+- [x] Connection status displayed
 
 ---
 

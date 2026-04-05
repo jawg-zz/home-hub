@@ -1,46 +1,73 @@
-export default function SecurityPage() {
-  const cameras = [
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+type Camera = {
+  id: string;
+  name: string;
+  location: string;
+  status: string;
+  streamUrl: string | null;
+};
+
+type Lock = {
+  id: string;
+  name: string;
+  location: string;
+  status: string;
+  lastActivity: Date | null;
+};
+
+type Alert = {
+  id: string;
+  type: string;
+  message: string;
+  source: string | null;
+  read: boolean;
+  createdAt: Date;
+};
+
+export default async function SecurityPage() {
+  const session = await auth();
+
+  const [cameras, locks, alerts]: [Camera[], Lock[], Alert[]] = await Promise.all([
+    prisma.camera.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+    prisma.lock.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 20,
+    }),
+    prisma.securityAlert.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+  ]);
+
+  const defaultCameras = [
     { id: "1", name: "Front Door", location: "Entrance", status: "online" },
     { id: "2", name: "Backyard", location: "Garden", status: "online" },
     { id: "3", name: "Garage", location: "Garage", status: "offline" },
     { id: "4", name: "Living Room", location: "Indoor", status: "online" },
   ];
 
-  const locks = [
-    {
-      id: "1",
-      name: "Front Door",
-      status: "locked",
-      lastActivity: "2 hours ago",
-    },
-    {
-      id: "2",
-      name: "Back Door",
-      status: "unlocked",
-      lastActivity: "30 mins ago",
-    },
+  const defaultLocks = [
+    { id: "1", name: "Front Door", status: "locked", lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+    { id: "2", name: "Back Door", status: "unlocked", lastActivity: new Date(Date.now() - 30 * 60 * 1000) },
   ];
 
-  const alerts = [
-    {
-      id: "1",
-      type: "motion",
-      message: "Motion detected at Front Door",
-      time: "5 mins ago",
-    },
-    {
-      id: "2",
-      type: "unlock",
-      message: "Back Door unlocked",
-      time: "30 mins ago",
-    },
-    {
-      id: "3",
-      type: "motion",
-      message: "Motion detected in Backyard",
-      time: "1 hour ago",
-    },
-  ];
+  const displayCameras = cameras.length > 0 ? cameras : defaultCameras;
+  const displayLocks = locks.length > 0 ? locks : defaultLocks;
+
+  const formatTimeAgo = (date: Date | null): string => {
+    if (!date) return "Unknown";
+    const diff = Date.now() - date.getTime();
+    const mins = Math.floor(diff / 60000);
+    const hours = Math.floor(mins / 60);
+    if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    if (mins > 0) return `${mins} min${mins > 1 ? "s" : ""} ago`;
+    return "Just now";
+  };
 
   return (
     <div>
@@ -55,7 +82,7 @@ export default function SecurityPage() {
           📹 Cameras
         </h2>
         <div className="grid grid-2">
-          {cameras.map((camera) => (
+          {displayCameras.map((camera) => (
             <div
               key={camera.id}
               style={{
@@ -127,7 +154,7 @@ export default function SecurityPage() {
           <h2 style={{ marginBottom: "1rem", fontSize: "1.25rem" }}>
             🔒 Smart Locks
           </h2>
-          {locks.map((lock) => (
+          {displayLocks.map((lock) => (
             <div
               key={lock.id}
               style={{
@@ -153,7 +180,7 @@ export default function SecurityPage() {
                 <div>
                   <div style={{ fontWeight: 500 }}>{lock.name}</div>
                   <div style={{ color: "#666", fontSize: "0.75rem" }}>
-                    {lock.lastActivity}
+                    {formatTimeAgo(lock.lastActivity)}
                   </div>
                 </div>
               </div>
@@ -171,9 +198,33 @@ export default function SecurityPage() {
           <h2 style={{ marginBottom: "1rem", fontSize: "1.25rem" }}>
             ⚠️ Recent Alerts
           </h2>
-          {alerts.map((alert) => (
+          {alerts.length > 0 ? (
+            alerts.slice(0, 5).map((alert) => (
+              <div
+                key={alert.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  padding: "1rem",
+                  background: "#151515",
+                  borderRadius: "8px",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <span style={{ fontSize: "1.25rem" }}>
+                  {alert.type === "motion" ? "👁️" : alert.type === "unlock" ? "🔓" : "⚠️"}
+                </span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 500 }}>{alert.message}</div>
+                  <div style={{ color: "#666", fontSize: "0.75rem" }}>
+                    {formatTimeAgo(new Date(alert.createdAt))}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
             <div
-              key={alert.id}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -184,24 +235,19 @@ export default function SecurityPage() {
                 marginBottom: "0.5rem",
               }}
             >
-              <span style={{ fontSize: "1.25rem" }}>
-                {alert.type === "motion" ? "👁️" : "🔓"}
-              </span>
+              <span style={{ fontSize: "1.25rem" }}>👁️</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 500 }}>{alert.message}</div>
-                <div style={{ color: "#666", fontSize: "0.75rem" }}>
-                  {alert.time}
-                </div>
+                <div style={{ fontWeight: 500 }}>Motion detected at Front Door</div>
+                <div style={{ color: "#666", fontSize: "0.75rem" }}>5 mins ago</div>
               </div>
             </div>
-          ))}
+          )}
         </div>
       </div>
 
       <div className="card">
         <p style={{ color: "#666", textAlign: "center" }}>
-          📷 Connect RTSP cameras or integrate with Home Assistant for live
-          feeds
+          📷 Add cameras and locks from the settings to see real-time data
         </p>
       </div>
     </div>

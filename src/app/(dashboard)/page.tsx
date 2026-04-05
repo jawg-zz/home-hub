@@ -1,6 +1,22 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+async function fetchWeather() {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const response = await fetch(`${baseUrl}/api/weather`, {
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      throw new Error("Weather fetch failed");
+    }
+    return response.json();
+  } catch (error) {
+    console.error("Weather fetch error:", error);
+    return null;
+  }
+}
+
 export default async function DashboardPage() {
   const session = await auth();
 
@@ -12,6 +28,7 @@ export default async function DashboardPage() {
       pendingChores,
       recentDevices,
       energyToday,
+      weatherData,
     ] = await Promise.all([
       prisma.device.count(),
       prisma.device.count({ where: { online: true } }),
@@ -35,17 +52,18 @@ export default async function DashboardPage() {
           },
         });
       })(),
+      fetchWeather(),
     ]);
 
-    // Mock weather data (would typically come from an API)
-    const weatherData = {
+    const defaultWeather = {
       temperature: 24,
       condition: "Partly Cloudy",
       humidity: 65,
       windSpeed: 12,
       location: "Nairobi, Kenya",
-      icon: "⛅", // Could be dynamic based on condition
+      icon: "⛅",
     };
+    const finalWeather = weatherData ?? defaultWeather;
 
     return (
       <div className="dashboard-container fade-in">
@@ -67,8 +85,8 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="quick-actions-header">
-            <button className="btn btn-secondary">Add Device</button>
-            <button className="btn btn-primary">New Task</button>
+            <a href="/devices?add=true" className="btn btn-secondary">Add Device</a>
+            <a href="/household?add=chore" className="btn btn-primary">New Task</a>
           </div>
         </header>
 
@@ -308,17 +326,17 @@ export default async function DashboardPage() {
               <div className="weather-content">
                 <div className="current-weather">
                   <div className="weather-main">
-                    <span className="weather-icon">{weatherData.icon}</span>
+                    <span className="weather-icon">{finalWeather.icon}</span>
                     <div className="weather-temp">
                       <span className="temp-value">
-                        {weatherData.temperature}
+                        {finalWeather.temperature}
                       </span>
                       <span className="temp-unit">°C</span>
                     </div>
                   </div>
                   <div className="weather-location">
-                    <span className="location">{weatherData.location}</span>
-                    <span className="condition">{weatherData.condition}</span>
+                    <span className="location">{finalWeather.location}</span>
+                    <span className="condition">{finalWeather.condition}</span>
                   </div>
                 </div>
 
@@ -326,18 +344,18 @@ export default async function DashboardPage() {
                   <div className="weather-detail">
                     <span className="detail-label">Humidity</span>
                     <span className="detail-value">
-                      {weatherData.humidity}%
+                      {finalWeather.humidity}%
                     </span>
                   </div>
                   <div className="weather-detail">
                     <span className="detail-label">Wind</span>
                     <span className="detail-value">
-                      {weatherData.windSpeed} km/h
+                      {finalWeather.windSpeed} km/h
                     </span>
                   </div>
                   <div className="weather-detail">
                     <span className="detail-label">Feels Like</span>
-                    <span className="detail-value">26°C</span>
+                    <span className="detail-value">{finalWeather.feelsLike}°C</span>
                   </div>
                 </div>
               </div>
