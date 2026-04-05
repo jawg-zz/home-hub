@@ -1,6 +1,6 @@
 # Home Hub - Smart Home Management Dashboard
 
-A modern smart home management dashboard built with Next.js, Prisma, and SQLite/PostgreSQL.
+A modern smart home management dashboard built with Next.js, Prisma, and PostgreSQL.
 
 ## Features
 
@@ -14,7 +14,7 @@ A modern smart home management dashboard built with Next.js, Prisma, and SQLite/
 
 - **Frontend**: Next.js 16, React 18, Recharts
 - **Backend**: Next.js API Routes
-- **Database**: SQLite (local) / PostgreSQL (production)
+- **Database**: PostgreSQL
 - **ORM**: Prisma
 - **Authentication**: NextAuth.js
 - **Validation**: Zod
@@ -25,6 +25,7 @@ A modern smart home management dashboard built with Next.js, Prisma, and SQLite/
 
 - Node.js 18+
 - npm or yarn
+- Docker (for local PostgreSQL)
 
 ### Installation
 
@@ -34,23 +35,20 @@ A modern smart home management dashboard built with Next.js, Prisma, and SQLite/
 npm install
 ```
 
-2. Set up the database:
+2. Start the PostgreSQL database:
 
-**For local development (SQLite):**
+```bash
+docker-compose up -d home-db
+```
+
+3. Set up the database:
 
 ```bash
 npx prisma db push
 npm run db:seed  # Optional: seed demo data
 ```
 
-**For production (PostgreSQL):**
-
-```bash
-# Update DATABASE_URL in .env to your PostgreSQL connection string
-npx prisma db push
-```
-
-3. Start the development server:
+4. Start the development server:
 
 ```bash
 npm run dev
@@ -70,11 +68,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 Create a `.env` file based on `.env.example`:
 
 ```env
-# For local development (SQLite)
-DATABASE_URL="file:./dev.db"
-
-# For production (PostgreSQL)
-# DATABASE_URL="postgresql://user:password@localhost:5432/homehub?schema=public"
+# PostgreSQL connection (via docker-compose)
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/homehub"
 
 NEXTAUTH_SECRET="your-secret-key"
 NEXTAUTH_URL="http://localhost:3000"

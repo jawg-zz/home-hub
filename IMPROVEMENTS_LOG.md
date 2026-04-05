@@ -84,7 +84,7 @@
 ### CRITICAL Issues Fixed
 
 - ✅ Fixed debug console.log statements leaking auth info in src/lib/auth.ts (removed sensitive logging)
-- ✅ Fixed Prisma datasource configuration (PostgreSQL for production, SQLite for local dev only)
+- ✅ Standardized database to PostgreSQL only (removed SQLite to prevent confusion)
 - ✅ Added JSON parse error handling to all API routes (devices, chores, shopping, toggle routes)
 - ✅ Added role-based authorization to device PATCH endpoint (was missing - now requires member role)
 
